@@ -40,6 +40,13 @@ Com isso finalizamos o set up.
 Rode `symfony server:start`
 Em outro terminal rode: `php bin/console app:sqs-process-file-worker` para iniciarlizar o consumer
 
+# Usage
+
+endpoint : POST `/api/billets/file`
+
+curl: `curl --location 'https://127.0.0.1:8000/api/billets/file' \
+--form 'csvFile=@"/path/to/file/teste.csv"'`
+
 # ADR (Architectural Decision Record)
 
 ## Application level
