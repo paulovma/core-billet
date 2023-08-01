@@ -1,0 +1,75 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+    env(MONGODB_URL): 'mongodb://teste:teste@localhost:27017/admin'
+    env(MONGODB_DB): 'core_billet'
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+        exclude:
+            # - '../src/Domain/File/Exception/'
+            # - '../src/Infrastructure/Database/Billet/FileDocument.php'
+            # - '../src/Entity/'
+            - '../src/Kernel.php'
+
+    App\Infrastructure\S3\File\S3Uploader:
+        arguments:
+            - '@Aws\S3\S3Client'
+            - '%env(resolve:AWS_S3_BUCKET)%'
+
+    App\Infrastructure\S3\File\S3Downloader:
+        arguments:
+            - '@Aws\S3\S3Client'
+            - '%env(resolve:AWS_S3_BUCKET)%'
+    
+    App\Infrastructure\SNS\File\SNSEventSender:
+        arguments:
+            - '@Aws\Sns\SnsClient'
+            - '%env(resolve:SNS_FILE_PROCESSED_TOPIC_ARN)%'
+
+    App\Infrastructure\SQS\File\SQSMessageSender:
+        arguments:
+            - '@Aws\Sqs\SqsClient'
+            - '%env(resolve:AWS_SQS_QUEUE)%'
+
+    App\Infrastructure\SQS\File\SQSMessageConsumer:
+        arguments:
+            - '@Aws\Sqs\SqsClient'
+            - '%env(resolve:AWS_SQS_QUEUE)%'
+            - '@App\Application\File\ProcessFileService'
+
+    App\Domain\File\Validator\FileSizeValidator:
+        tags: ['app.file_validator']
+    App\Domain\File\Validator\FileAlreadyExistsValidator:
+        tags: ['app.file_validator']
+
+    App\Domain\File\Validator\ValidatorChain:
+        arguments: [!tagged app.file_validator]
+
+    App\Domain\File\FileRepository: '@App\Infrastructure\Database\File\MongoAdapter'
+    App\Domain\File\FileStorer: '@App\Infrastructure\S3\File\S3Uploader'
+    App\Domain\File\FileProcessedEventSender: '@App\Infrastructure\SNS\File\SNSEventSender'
+    App\Domain\File\FileDownloader: '@App\Infrastructure\S3\File\S3Downloader'
+    App\Domain\File\ProcessFileMessageSender: '@App\Infrastructure\SQS\File\SQSMessageSender'
+    App\Domain\Billet\BilletRepository: '@App\Infrastructure\Database\Billet\MongoAdapter'
+
+
+    App\Infrastructure\Command\SQSProcessFileConsumerCommand:
+        arguments:
+            - '@App\Infrastructure\SQS\File\SQSMessageConsumer'
+        tags:
+            -  { name: console.command }
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones

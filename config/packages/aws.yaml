@@ -1,0 +1,9 @@
+# config/packages/aws.yaml
+aws:
+    version: 'latest'
+    region: 'us-east-1' # Change to your desired region
+    use_path_style_endpoint: true
+    credentials:
+        key: 'teste'
+        secret: 'teste'
+    endpoint: 'http://localhost:4566'

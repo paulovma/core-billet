@@ -1,0 +1,9 @@
+controllers:
+    resource:
+        path: ../src/Infrastructure/API/
+        namespace: App\Infrastructure\API
+    type: attribute
+
+upload_csv:
+    path: /api/billets/file
+    controller: App\Infrastructure\API\UploadBilletFileController::uploadCsv
