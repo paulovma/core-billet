@@ -47,6 +47,7 @@ class ProcessFileService
         $this->setFileProcessed($file);
         $this->fileProcessedEventSender->send($file);
         //TODO move file to /PROCESSED folder
+        //TODO remove file from tmp folder
     }
 
     private function setFileProcessed(File $file): void

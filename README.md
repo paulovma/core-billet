@@ -89,6 +89,9 @@ O que faltou fazer:
 - Webhook para recebimento de pagamentos
     - Aqui a ideia seria ter uma outra aplicação chamada core-payment para receber os pagamentos.
     Essa aplicação se comunicaria com core-billet para verificar se o 'debtId' recebido existe, de fato, no core-billet, caso exista o pagamento seria registrado.
+- Código para envio do boleto para o cliente
+    - A decisão de arquitetura foi primeiramente processar o arquivo e inserir os boletos e, depois disso, fazer consulta paginada paginada na base para buscar os boletos criados e enviar     
+    para os clientes.
 - Dockerizar o core-billet
 
 # Disclaimer
